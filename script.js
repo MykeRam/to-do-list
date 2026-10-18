@@ -7,6 +7,8 @@ class TodoApp {
         this.deletingIds = new Set();
         this.deletionAnimations = [];
         this.todayLayoutAnimation = null;
+        this.historyOpen = false;
+        this.historyAnimation = null;
         this.currentDay = this.getTodayDate();
         // Give older undated tasks a stable day so they can enter History too.
         if (this.todos.some(todo => !todo.date)) {
@@ -48,18 +50,13 @@ class TodoApp {
         const fields = [input, dateInput];
 
         const historyLink = document.getElementById('history-link');
-        const historySection = document.getElementById('history-section');
         historyLink.addEventListener('click', (event) => {
             event.preventDefault();
             this.refreshDay();
-            historySection.hidden = !historySection.hidden;
-            historyLink.setAttribute('aria-expanded', String(!historySection.hidden));
-            if (!historySection.hidden) historySection.scrollIntoView({ block: 'nearest' });
+            this.setHistoryOpen(!this.historyOpen);
         });
         document.getElementById('history-close-btn').addEventListener('click', () => {
-            historySection.hidden = true;
-            historyLink.setAttribute('aria-expanded', 'false');
-            historyLink.focus();
+            this.setHistoryOpen(false);
         });
         const checkDay = () => {
             this.refreshDay();
@@ -73,9 +70,7 @@ class TodoApp {
         document.getElementById('review-rollover-btn').addEventListener('click', () => {
             this.refreshDay();
             this.dismissRolloverPrompt();
-            historySection.hidden = false;
-            historyLink.setAttribute('aria-expanded', 'true');
-            historySection.scrollIntoView({ block: 'start' });
+            this.setHistoryOpen(true);
             document.getElementById('rollover-all-btn').focus();
         });
         document.getElementById('dismiss-rollover-btn').addEventListener('click', () => this.dismissRolloverPrompt());
@@ -183,6 +178,42 @@ class TodoApp {
                 this.saveEdit();
             }
         });
+    }
+
+    async setHistoryOpen(open) {
+        if (open === this.historyOpen) return;
+        this.historyOpen = open;
+        const panel = document.getElementById('history-section');
+        const link = document.getElementById('history-link');
+        link.setAttribute('aria-expanded', String(open));
+        if (!open) link.focus();
+
+        const offscreen = 'translateY(calc(100% + 40px))';
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        // Start from the current position when the user reverses mid-animation.
+        const style = panel.hidden || reduceMotion ? null : window.getComputedStyle(panel);
+        const start = style
+            ? { transform: style.transform, opacity: style.opacity }
+            : { transform: offscreen, opacity: 0 };
+        this.historyAnimation?.cancel();
+        this.historyAnimation = null;
+        panel.inert = !open;
+        if (reduceMotion) {
+            panel.hidden = !open;
+            return;
+        }
+
+        panel.hidden = false;
+        const animation = panel.animate([
+            start,
+            { transform: open ? 'translateY(0)' : offscreen, opacity: open ? 1 : 0 }
+        ], { duration: 450, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' });
+        this.historyAnimation = animation;
+        await animation.finished.catch(() => {});
+        if (this.historyAnimation !== animation) return;
+        panel.hidden = !open;
+        animation.cancel();
+        this.historyAnimation = null;
     }
 
     async animateInputReset(fields) {
