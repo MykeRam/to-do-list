@@ -54,6 +54,25 @@ h1 {
     padding-inline: 70px;
 }
 
+.app-footer {
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 1px solid #eee;
+    color: #666;
+    font-size: 13px;
+    text-align: center;
+}
+
+.app-footer a {
+    color: #2e7d32;
+    text-underline-offset: 3px;
+    transition: color 0.25s ease;
+}
+
+.app-footer a:hover {
+    color: #1b5e20;
+}
+
 .input-section {
     display: flex;
     align-items: flex-end;
