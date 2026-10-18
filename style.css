@@ -382,6 +382,22 @@ h2 {
     font-size: 15px;
 }
 
+.history-day-header {
+    display: flex;
+    align-items: center;
+    gap: 8px 12px;
+}
+
+.history-day-header .history-date {
+    flex: 1;
+    min-width: 0;
+}
+
+.history-day-header .rollover-select {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
 .rollover-panel {
     margin: 20px 0;
     padding: 16px;
@@ -440,7 +456,7 @@ h2 {
     cursor: pointer;
 }
 
-.rollover-choice {
+.rollover-day-choice {
     accent-color: #2e7d32;
 }
 

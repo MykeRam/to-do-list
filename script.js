@@ -105,13 +105,11 @@ class TodoApp {
             this.rollOverTasks(this.getRolloverCandidates().map(todo => todo.id));
         });
         const historyContent = document.getElementById('history-content');
-        historyContent.addEventListener('change', () => {
-            document.getElementById('rollover-selected-btn').disabled =
-                historyContent.querySelectorAll('.rollover-choice:checked').length === 0;
-        });
-        document.getElementById('rollover-selected-btn').addEventListener('click', () => {
-            const ids = Array.from(historyContent.querySelectorAll('.rollover-choice:checked'))
-                .map(input => Number(input.dataset.id));
+        historyContent.addEventListener('change', (event) => {
+            if (!event.target.classList.contains('rollover-day-choice') || !event.target.checked) return;
+            const ids = this.getRolloverCandidates()
+                .filter(todo => todo.date === event.target.dataset.date)
+                .map(todo => todo.id);
             this.rollOverTasks(ids);
         });
 
@@ -729,7 +727,6 @@ class TodoApp {
         document.getElementById('rollover-result').textContent = '';
         const eligibleIds = new Set(this.getRolloverCandidates().map(todo => todo.id));
         document.getElementById('rollover-controls').hidden = eligibleIds.size === 0;
-        document.getElementById('rollover-selected-btn').disabled = true;
         const grouped = {};
         this.todos.forEach(todo => {
             if (todo.date < todayDate) (grouped[todo.date] ||= []).push(todo);
@@ -749,22 +746,27 @@ class TodoApp {
             heading.textContent = this.parseLocalDate(date).toLocaleDateString('en-US', {
                 weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
             });
+            const dayHeader = document.createElement('div');
+            dayHeader.className = 'history-day-header';
+            dayHeader.appendChild(heading);
+            const unfinishedCount = grouped[date].filter(todo => eligibleIds.has(todo.id)).length;
+            if (unfinishedCount > 0) {
+                const label = document.createElement('label');
+                label.className = 'rollover-select';
+                label.title = `Roll over all ${unfinishedCount} unfinished ${unfinishedCount === 1 ? 'task' : 'tasks'} from this day`;
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'rollover-day-choice';
+                checkbox.dataset.date = date;
+                checkbox.setAttribute('aria-label', `Roll over all unfinished tasks from ${heading.textContent}`);
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode('Roll over'));
+                dayHeader.appendChild(label);
+            }
             const list = document.createElement('ul');
             list.className = 'task-list';
             grouped[date].forEach(todo => {
                 const item = this.createTodoElement(todo);
-                if (eligibleIds.has(todo.id)) {
-                    const label = document.createElement('label');
-                    label.className = 'rollover-select';
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.className = 'rollover-choice';
-                    checkbox.dataset.id = todo.id;
-                    label.appendChild(checkbox);
-                    label.appendChild(document.createTextNode('Roll over'));
-                    item.prepend(label);
-                }
-
                 if (eligibleIds.has(todo.id)) {
                     const rolloverButton = document.createElement('button');
                     rolloverButton.type = 'button';
@@ -778,7 +780,7 @@ class TodoApp {
                 }
                 list.appendChild(item);
             });
-            day.appendChild(heading);
+            day.appendChild(dayHeader);
             day.appendChild(list);
             content.appendChild(day);
         });
