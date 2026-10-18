@@ -167,19 +167,27 @@ class TodoApp {
         this.render(newTodo.id);
     }
 
-    createTodoElement(todo, showDate = false, animateId = null) {
+    createTodoElement(todo, showDate = false, animateId = null, useSlotEntrance = false) {
         const todoItem = document.createElement('li');
-        todoItem.className = todo.id === animateId ? 'todo-item todo-enter' : 'todo-item';
+        const isNewTodo = todo.id === animateId;
+        const slotEntrance = isNewTodo && useSlotEntrance;
+        todoItem.className = 'todo-item';
+        if (isNewTodo) {
+            todoItem.className += slotEntrance ? ' todo-slot-enter' : ' todo-enter';
+        }
         todoItem.dataset.id = todo.id;
         const dateHtml = showDate && todo.date
             ? `<span class="todo-date overdue">${this.formatDate(todo.date)}</span>`
             : '';
-        todoItem.innerHTML = `
+        const content = `
             <span class="todo-text">${this.escapeHtml(todo.task)}</span>
             ${dateHtml}
             <input type="text" class="todo-input" style="display: none;" aria-label="Edit task">
             <button class="delete-btn">Delete</button>
         `;
+        todoItem.innerHTML = slotEntrance
+            ? `<div class="todo-slot-content">${content}</div>`
+            : content;
         return todoItem;
     }
 
@@ -357,7 +365,7 @@ class TodoApp {
         const todoList = document.getElementById('todo-list');
         const todayTodos = this.todos.filter(todo => !todo.date || todo.date === todayDate);
         todoList.innerHTML = '';
-        todayTodos.forEach(todo => todoList.appendChild(this.createTodoElement(todo, false, animateId)));
+        todayTodos.forEach(todo => todoList.appendChild(this.createTodoElement(todo, false, animateId, true)));
         if (todayTodos.length === 0) {
             todoList.innerHTML = '<li class="empty-message">No tasks for today. Add one above!</li>';
         }

@@ -140,8 +140,27 @@ h2 {
     animation: fadeIn 0.45s ease-out;
 }
 
+.todo-slot-enter {
+    overflow: hidden;
+}
+
+.todo-slot-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-width: 0;
+    animation: todoSlotEnter 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes todoSlotEnter {
+    from { transform: translateY(120%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-    .todo-enter {
+    .todo-enter,
+    .todo-slot-content {
         animation: none;
     }
 }
