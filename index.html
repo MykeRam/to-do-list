@@ -21,6 +21,13 @@
                 <button id="add-btn">Add</button>
             </div>
         </div>
+        <aside id="rollover-prompt" class="rollover-panel" aria-labelledby="rollover-message" hidden>
+            <p id="rollover-message" role="status"></p>
+            <div class="rollover-actions">
+                <button type="button" id="review-rollover-btn">Yes, review tasks</button>
+                <button type="button" id="dismiss-rollover-btn">Not now</button>
+            </div>
+        </aside>
         <section aria-labelledby="today-heading">
             <h2 id="today-heading">Today</h2>
             <ul id="todo-list" class="task-list"></ul>
@@ -30,7 +37,18 @@
             <div class="grid-content"></div>
         </section>
         <section id="history-section" aria-labelledby="history-heading" hidden>
-            <h2 id="history-heading">History</h2>
+            <div class="history-header">
+                <h2 id="history-heading">History</h2>
+                <button type="button" id="history-close-btn" aria-label="Close History">&times;</button>
+            </div>
+            <div id="rollover-controls" class="rollover-panel" hidden>
+                <p>Select unfinished tasks from yesterday to bring into Today.</p>
+                <div class="rollover-actions">
+                    <button type="button" id="rollover-all-btn">Roll over all</button>
+                    <button type="button" id="rollover-selected-btn" disabled>Roll over selected</button>
+                </div>
+            </div>
+            <p id="rollover-result" role="status"></p>
             <div id="history-content"></div>
         </section>
     </div>

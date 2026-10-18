@@ -56,6 +56,11 @@ class TodoApp {
             historyLink.setAttribute('aria-expanded', String(!historySection.hidden));
             if (!historySection.hidden) historySection.scrollIntoView({ block: 'nearest' });
         });
+        document.getElementById('history-close-btn').addEventListener('click', () => {
+            historySection.hidden = true;
+            historyLink.setAttribute('aria-expanded', 'false');
+            historyLink.focus();
+        });
         const checkDay = () => {
             this.refreshDay();
             this.scheduleDayRollover();
@@ -63,6 +68,29 @@ class TodoApp {
         window.addEventListener('focus', checkDay);
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) checkDay();
+        });
+
+        document.getElementById('review-rollover-btn').addEventListener('click', () => {
+            this.refreshDay();
+            this.dismissRolloverPrompt();
+            historySection.hidden = false;
+            historyLink.setAttribute('aria-expanded', 'true');
+            historySection.scrollIntoView({ block: 'start' });
+            document.getElementById('rollover-all-btn').focus();
+        });
+        document.getElementById('dismiss-rollover-btn').addEventListener('click', () => this.dismissRolloverPrompt());
+        document.getElementById('rollover-all-btn').addEventListener('click', () => {
+            this.rollOverTasks(this.getRolloverCandidates().map(todo => todo.id));
+        });
+        const historyContent = document.getElementById('history-content');
+        historyContent.addEventListener('change', () => {
+            document.getElementById('rollover-selected-btn').disabled =
+                historyContent.querySelectorAll('.rollover-choice:checked').length === 0;
+        });
+        document.getElementById('rollover-selected-btn').addEventListener('click', () => {
+            const ids = Array.from(historyContent.querySelectorAll('.rollover-choice:checked'))
+                .map(input => Number(input.dataset.id));
+            this.rollOverTasks(ids);
         });
 
         const updateValidity = (field) => {
@@ -221,6 +249,7 @@ class TodoApp {
         const slotEntrance = isNewTodo && useSlotEntrance;
         todoItem.className = 'todo-item';
         if (todo.completed) todoItem.className += ' is-completed';
+        if (todo.rolledOverFrom) todoItem.className += ' is-rolled-over';
         if (isNewTodo) {
             todoItem.className += slotEntrance ? ' todo-slot-enter' : ' todo-enter';
         }
@@ -248,6 +277,51 @@ class TodoApp {
     getTodayDate() {
         const today = new Date();
         return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    }
+
+    getRolloverCandidates() {
+        const yesterday = this.parseLocalDate(this.getTodayDate());
+        yesterday.setDate(yesterday.getDate() - 1);
+        const key = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+        return this.todos.filter(todo => todo.date === key && !todo.completed && !todo.rolledOverTo
+            && !this.deletingIds.has(todo.id));
+    }
+
+    dismissRolloverPrompt() {
+        localStorage.setItem('rolloverPromptDismissed', this.getTodayDate());
+        this.renderRolloverPrompt();
+    }
+
+    renderRolloverPrompt() {
+        const count = this.getRolloverCandidates().length;
+        const dismissed = localStorage.getItem('rolloverPromptDismissed') === this.getTodayDate();
+        document.getElementById('rollover-prompt').hidden = count === 0 || dismissed;
+        document.getElementById('rollover-message').textContent =
+            `You have ${count} unfinished ${count === 1 ? 'task' : 'tasks'} from yesterday. Would you like to roll any over to today?`;
+    }
+
+    rollOverTasks(ids) {
+        this.refreshDay();
+        const selectedIds = new Set(ids);
+        const candidates = this.getRolloverCandidates().filter(todo => selectedIds.has(todo.id));
+        if (candidates.length === 0) return;
+        const today = this.getTodayDate();
+        let nextId = this.todos.reduce((max, todo) => Math.max(max, Number(todo.id) || 0), Date.now());
+        candidates.forEach(todo => {
+            this.todos.push({
+                id: ++nextId,
+                task: todo.task,
+                date: today,
+                completed: false,
+                rolledOverFrom: todo.date
+            });
+            // Keep the original day's record and prevent rolling it over twice.
+            todo.rolledOverTo = today;
+        });
+        this.saveTodos();
+        this.render();
+        document.getElementById('rollover-result').textContent =
+            `${candidates.length} ${candidates.length === 1 ? 'task rolled' : 'tasks rolled'} over to Today.`;
     }
 
     parseLocalDate(dateString) {
@@ -436,6 +510,10 @@ class TodoApp {
         if (!todo) return;
         todo.completed = !todo.completed;
         this.saveTodos();
+        if (todo.date < this.getTodayDate()) {
+            this.render();
+            return;
+        }
 
         const item = document.querySelector(`[data-id="${id}"]`);
         if (!item) return;
@@ -531,11 +609,16 @@ class TodoApp {
         this.renderGrid(animateId, animateRemoval);
 
         this.renderHistory(todayDate);
+        this.renderRolloverPrompt();
     }
 
     renderHistory(todayDate) {
         const content = document.getElementById('history-content');
         content.innerHTML = '';
+        document.getElementById('rollover-result').textContent = '';
+        const eligibleIds = new Set(this.getRolloverCandidates().map(todo => todo.id));
+        document.getElementById('rollover-controls').hidden = eligibleIds.size === 0;
+        document.getElementById('rollover-selected-btn').disabled = true;
         const grouped = {};
         this.todos.forEach(todo => {
             if (todo.date < todayDate) (grouped[todo.date] ||= []).push(todo);
@@ -557,7 +640,26 @@ class TodoApp {
             });
             const list = document.createElement('ul');
             list.className = 'task-list';
-            grouped[date].forEach(todo => list.appendChild(this.createTodoElement(todo)));
+            grouped[date].forEach(todo => {
+                const item = this.createTodoElement(todo);
+                if (eligibleIds.has(todo.id)) {
+                    const label = document.createElement('label');
+                    label.className = 'rollover-select';
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'rollover-choice';
+                    checkbox.dataset.id = todo.id;
+                    label.appendChild(checkbox);
+                    label.appendChild(document.createTextNode('Roll over'));
+                    item.prepend(label);
+                } else if (todo.rolledOverTo) {
+                    const note = document.createElement('span');
+                    note.className = 'rollover-note';
+                    note.textContent = `Rolled over to ${this.formatDate(todo.rolledOverTo)}`;
+                    item.appendChild(note);
+                }
+                list.appendChild(item);
+            });
             day.appendChild(heading);
             day.appendChild(list);
             content.appendChild(day);

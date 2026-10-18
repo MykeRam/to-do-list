@@ -143,7 +143,50 @@ h2 {
 }
 
 #history-section {
-    margin-top: 30px;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    bottom: 20px;
+    width: min(340px, calc(100vw - 40px));
+    padding: 20px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: white;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+    z-index: 10;
+}
+
+@media (min-width: 1280px) {
+    #history-section {
+        width: min(340px, calc((100vw - 800px) / 2 - 32px));
+    }
+}
+
+.history-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+#history-close-btn {
+    padding: 0 4px;
+    border: 0;
+    background: transparent;
+    color: #666;
+    font-size: 26px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+#history-close-btn:hover {
+    color: #222;
+}
+
+#history-content .todo-text {
+    min-width: 100px;
 }
 
 .history-day {
@@ -153,6 +196,82 @@ h2 {
 .history-date {
     color: #666;
     font-size: 15px;
+}
+
+.rollover-panel {
+    margin: 20px 0;
+    padding: 16px;
+    border: 1px solid #e3c59c;
+    border-radius: 6px;
+    background-color: #fff8ef;
+}
+
+.rollover-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.rollover-actions button {
+    padding: 8px 12px;
+    border: 1px solid #2e7d32;
+    border-radius: 4px;
+    background-color: #2e7d32;
+    color: white;
+    font: inherit;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.rollover-actions button:hover:not(:disabled) {
+    background-color: #1b5e20;
+}
+
+.rollover-actions button:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+#dismiss-rollover-btn {
+    background-color: white;
+    color: #333;
+    border-color: #aaa;
+}
+
+#dismiss-rollover-btn:hover {
+    background-color: #eee;
+}
+
+#history-content .todo-item {
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.rollover-select {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.rollover-choice {
+    accent-color: #2e7d32;
+}
+
+.rollover-note {
+    color: #666;
+    font-size: 12px;
+}
+
+#rollover-result:not(:empty) {
+    margin-top: 12px;
+    color: #2e7d32;
+}
+
+.is-rolled-over .todo-text {
+    color: #c65d00;
 }
 
 .todo-item {
