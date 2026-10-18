@@ -43,7 +43,13 @@ h1 {
 .input-actions {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 16px;
+}
+
+#todo-input,
+#date-input,
+#add-btn {
+    height: 42px;
 }
 
 #history-link {
