@@ -252,6 +252,40 @@ h2 {
     border-bottom: 1px solid #ddd;
 }
 
+.grid-heading-text {
+    display: inline-block;
+}
+
+.upcoming-intro {
+    animation: upcomingSectionEnter 0.8s ease-out both;
+}
+
+.upcoming-intro .grid-heading-text {
+    animation: upcomingTypewriter 0.98s steps(14, end) 0.8s both;
+}
+
+.upcoming-intro .grid-item {
+    animation: fadeIn 0.55s ease-out 1.95s both;
+}
+
+@keyframes upcomingSectionEnter {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes upcomingTypewriter {
+    from { clip-path: inset(0 100% 0 0); }
+    to { clip-path: inset(0 0 0 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .upcoming-intro,
+    .upcoming-intro .grid-heading-text,
+    .upcoming-intro .grid-item {
+        animation: none;
+    }
+}
+
 .grid-content {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
