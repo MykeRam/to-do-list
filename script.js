@@ -6,6 +6,7 @@ class TodoApp {
         this.currentEditValue = '';
         this.deletingIds = new Set();
         this.deletionAnimations = [];
+        this.todayLayoutAnimation = null;
         this.init();
     }
 
@@ -421,10 +422,26 @@ class TodoApp {
         const todayDate = this.getTodayDate();
         const todoList = document.getElementById('todo-list');
         const todayTodos = this.todos.filter(todo => !todo.date || todo.date === todayDate);
+        const animateTodayLayout = todayTodos.some(todo => todo.id === animateId)
+            && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const previousHeight = animateTodayLayout ? todoList.getBoundingClientRect().height : null;
+        this.todayLayoutAnimation?.cancel();
+        this.todayLayoutAnimation = null;
         todoList.innerHTML = '';
         todayTodos.forEach(todo => todoList.appendChild(this.createTodoElement(todo, false, animateId, true)));
         if (todayTodos.length === 0) {
             todoList.innerHTML = '<li class="empty-message">No tasks for today. Add one above!</li>';
+        }
+
+        if (animateTodayLayout) {
+            const nextHeight = todoList.getBoundingClientRect().height;
+            if (previousHeight !== nextHeight) {
+                // Grow the actual list so every section below it moves together.
+                this.todayLayoutAnimation = todoList.animate([
+                    { height: `${previousHeight}px`, overflow: 'hidden' },
+                    { height: `${nextHeight}px`, overflow: 'hidden' }
+                ], { duration: 600, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+            }
         }
 
         this.renderGrid(animateId, animateRemoval);
