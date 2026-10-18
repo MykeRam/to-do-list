@@ -241,6 +241,15 @@ class TodoApp {
 
         const gridContainer = document.getElementById('todo-grid');
         const gridContent = gridContainer.querySelector('.grid-content');
+        const animateLayout = animateId !== null
+            && this.todos.some(todo => todo.id === animateId && todo.date > todayDate)
+            && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const previousPositions = new Map();
+        if (animateLayout && !gridContainer.hidden) {
+            Array.from(gridContent.children).forEach(card => {
+                previousPositions.set(card.dataset.date, card.getBoundingClientRect());
+            });
+        }
         gridContent.innerHTML = '';
         const dates = Object.keys(groupedTodos).sort();
         const revealUpcoming = gridContainer.hidden && dates.length > 0 && animateId !== null;
@@ -250,8 +259,9 @@ class TodoApp {
         // Render every future date, wrapping into additional rows as needed.
         dates.forEach(dateKey => {
             const dateElement = document.createElement('div');
+            dateElement.dataset.date = dateKey;
             const containsNewTodo = groupedTodos[dateKey].some(todo => todo.id === animateId);
-            dateElement.className = containsNewTodo && !revealUpcoming ? 'grid-item todo-enter' : 'grid-item';
+            dateElement.className = containsNewTodo && !revealUpcoming ? 'grid-item grid-card-enter' : 'grid-item';
             const label = document.createElement('h3');
             label.className = 'date-label';
             label.textContent = this.parseLocalDate(dateKey).toLocaleDateString('en-US', {
@@ -263,6 +273,23 @@ class TodoApp {
             dateElement.appendChild(label);
             dateElement.appendChild(tasks);
             gridContent.appendChild(dateElement);
+        });
+
+        // Carry existing cards smoothly from their old layout into the new grid.
+        const cardPositions = Array.from(gridContent.children).map(card => ({
+            card,
+            previous: previousPositions.get(card.dataset.date),
+            next: animateLayout ? card.getBoundingClientRect() : null
+        }));
+        cardPositions.forEach(({ card, previous, next }) => {
+            if (!previous || card.classList.contains('grid-card-enter')) return;
+            const x = previous.left - next.left;
+            const y = previous.top - next.top;
+            if (x === 0 && y === 0 && previous.width === next.width) return;
+            card.animate([
+                { transform: `translate(${x}px, ${y}px)`, width: `${previous.width}px` },
+                { transform: 'translate(0, 0)', width: `${next.width}px` }
+            ], { duration: 550, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
         });
     }
 

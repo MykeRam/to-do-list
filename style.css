@@ -322,6 +322,16 @@ h2 {
     border-right: 1px solid #ddd;
 }
 
+.grid-card-enter {
+    animation: fadeIn 0.55s ease-out 0.25s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .grid-card-enter {
+        animation: none;
+    }
+}
+
 .grid-item:last-child {
     border-right: none;
 }
