@@ -240,7 +240,8 @@ class TodoApp {
         // Render every future date, wrapping into additional rows as needed.
         dates.forEach(dateKey => {
             const dateElement = document.createElement('div');
-            dateElement.className = 'grid-item';
+            const containsNewTodo = groupedTodos[dateKey].some(todo => todo.id === animateId);
+            dateElement.className = containsNewTodo ? 'grid-item todo-enter' : 'grid-item';
             const label = document.createElement('h3');
             label.className = 'date-label';
             label.textContent = this.parseLocalDate(dateKey).toLocaleDateString('en-US', {
@@ -248,7 +249,7 @@ class TodoApp {
             });
             const tasks = document.createElement('ul');
             tasks.className = 'tasks';
-            groupedTodos[dateKey].forEach(todo => tasks.appendChild(this.createTodoElement(todo, false, animateId)));
+            groupedTodos[dateKey].forEach(todo => tasks.appendChild(this.createTodoElement(todo)));
             dateElement.appendChild(label);
             dateElement.appendChild(tasks);
             gridContent.appendChild(dateElement);
