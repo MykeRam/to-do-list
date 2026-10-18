@@ -331,10 +331,6 @@ h2 {
     }
 }
 
-.grid-item:last-child {
-    border-right: none;
-}
-
 .grid-item.empty {
     background-color: #f9f9f9;
     color: #999;
