@@ -13,11 +13,22 @@ class TodoApp {
         this.notesAnimation = null;
         this.notesTodoId = null;
         this.currentDay = this.getTodayDate();
+        // Remove duplicate History records created by the previous rollover flow.
+        const previousCount = this.todos.length;
+        this.todos = this.todos.filter(todo => !todo.rolledOverTo);
+        let migrated = this.todos.length !== previousCount;
+        this.todos.forEach(todo => {
+            if (todo.rolledOverFrom && !Array.isArray(todo.rolloverLog)) {
+                this.appendRolloverNote(todo, todo.rolledOverFrom, todo.date);
+                migrated = true;
+            }
+        });
         // Give older undated tasks a stable day so they can enter History too.
         if (this.todos.some(todo => !todo.date)) {
             this.todos.forEach(todo => { if (!todo.date) todo.date = this.currentDay; });
-            this.saveTodos();
+            migrated = true;
         }
+        if (migrated) this.saveTodos();
         this.init();
     }
 
@@ -397,23 +408,26 @@ class TodoApp {
         const candidates = this.getRolloverCandidates().filter(todo => selectedIds.has(todo.id));
         if (candidates.length === 0) return;
         const today = this.getTodayDate();
-        let nextId = this.todos.reduce((max, todo) => Math.max(max, Number(todo.id) || 0), Date.now());
         candidates.forEach(todo => {
-            this.todos.push({
-                id: ++nextId,
-                task: todo.task,
-                date: today,
-                completed: false,
-                notes: todo.notes || '',
-                rolledOverFrom: todo.date
-            });
-            // Keep the original day's record and prevent rolling it over twice.
-            todo.rolledOverTo = today;
+            const previousDate = todo.date;
+            this.appendRolloverNote(todo, previousDate, today);
+            todo.date = today;
+            todo.rolledOverFrom = previousDate;
+            if (this.notesOpen && this.notesTodoId === todo.id) {
+                document.getElementById('task-notes').value = todo.notes;
+                document.getElementById('notes-save-status').textContent = 'Notes saved.';
+            }
         });
         this.saveTodos();
         this.render();
         document.getElementById('rollover-result').textContent =
             `${candidates.length} ${candidates.length === 1 ? 'task rolled' : 'tasks rolled'} over to Today.`;
+    }
+
+    appendRolloverNote(todo, from, to) {
+        const entry = `Rolled over on ${to} from ${from}.`;
+        todo.notes = todo.notes ? `${todo.notes}\n\n${entry}` : entry;
+        todo.rolloverLog = [...(todo.rolloverLog || []), { from, to }];
     }
 
     parseLocalDate(dateString) {
@@ -761,11 +775,6 @@ class TodoApp {
                         <path d="M15 4l4 4-4 4M19 8H9a5 5 0 0 0 0 10h3"></path>
                     </svg>`;
                     item.querySelector('.todo-actions').prepend(rolloverButton);
-                } else if (todo.rolledOverTo) {
-                    const note = document.createElement('span');
-                    note.className = 'rollover-note';
-                    note.textContent = `Rolled over to ${this.formatDate(todo.rolledOverTo)}`;
-                    item.appendChild(note);
                 }
                 list.appendChild(item);
             });
