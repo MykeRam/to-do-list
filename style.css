@@ -27,12 +27,21 @@ h1 {
 
 .input-section {
     display: flex;
-    margin-bottom: 20px;
+    margin-bottom: 32px;
     gap: 10px;
 }
 
-#todo-input {
+.input-slot {
+    position: relative;
+    min-width: 0;
+}
+
+.task-slot {
     flex: 1;
+}
+
+#todo-input {
+    width: 100%;
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 4px 0 0 4px;
@@ -44,6 +53,30 @@ h1 {
     border: 1px solid #ddd;
     border-radius: 0;
     font-size: 16px;
+}
+
+.slot-reel {
+    position: absolute;
+    inset: 1px;
+    overflow: hidden;
+    background: white;
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+.slot-value {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font: 16px Arial, sans-serif;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.slot-placeholder {
+    color: #757575;
 }
 
 .input-section input[aria-invalid="true"] {
@@ -172,13 +205,12 @@ h2 {
 }
 
 .todo-text.saved {
-    animation: flash 1.5s ease-out;
+    animation: flash 2s ease-out;
 }
 
 @keyframes flash {
-    0% { color: black; }
-    50% { color: #4CAF50; }
-    100% { color: black; }
+    0%, 10% { color: #4CAF50; }
+    /* The omitted end frame fades back to the text's normal color. */
 }
 
 .delete-btn {
@@ -245,7 +277,7 @@ h2 {
     margin-bottom: 10px;
     padding: 5px;
     border-radius: 3px;
-    background-color: #f0f0f0;
+    text-decoration: underline;
     text-align: center;
 }
 

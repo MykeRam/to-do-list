@@ -10,8 +10,12 @@
     <div class="container">
         <h1>Todo List</h1>
         <div class="input-section">
-            <input type="text" id="todo-input" placeholder="Add a new task..." aria-label="Task (required)" required>
-            <input type="date" id="date-input" aria-label="Due date (required)" required>
+            <div class="input-slot task-slot">
+                <input type="text" id="todo-input" placeholder="Add a new task..." aria-label="Task (required)" required>
+            </div>
+            <div class="input-slot">
+                <input type="date" id="date-input" aria-label="Due date (required)" required>
+            </div>
             <button id="add-btn">Add</button>
         </div>
         <section aria-labelledby="today-heading">

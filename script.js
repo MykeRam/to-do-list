@@ -37,8 +37,10 @@ class TodoApp {
             field.addEventListener('animationend', () => field.classList.remove('input-shake'));
         });
 
-        const submitTodo = (e) => {
+        let isSubmitting = false;
+        const submitTodo = async (e) => {
             e.preventDefault();
+            if (isSubmitting) return;
             const invalidFields = fields.filter(field => !updateValidity(field));
             if (invalidFields.length) {
                 invalidFields.forEach(field => {
@@ -53,8 +55,13 @@ class TodoApp {
                 return;
             }
             this.addTodo(input.value, dateInput.value);
-            input.value = '';
-            dateInput.value = '';
+            isSubmitting = true;
+            try {
+                await this.animateInputReset(fields);
+            } finally {
+                isSubmitting = false;
+                input.focus();
+            }
         };
 
         // Use the same validation for the button and keyboard.
@@ -95,6 +102,50 @@ class TodoApp {
                 this.saveEdit();
             }
         });
+    }
+
+    async animateInputReset(fields) {
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const animations = [];
+        const layers = [];
+
+        try {
+            fields.forEach(field => {
+                const previousValue = field.type === 'date'
+                    ? field.value.split('-').slice(1).concat(field.value.split('-')[0]).join('/')
+                    : field.value;
+                field.value = '';
+                if (reduceMotion) return;
+
+                field.readOnly = true;
+                const layer = document.createElement('div');
+                layer.className = 'slot-reel';
+                layer.setAttribute('aria-hidden', 'true');
+                const outgoing = document.createElement('span');
+                outgoing.className = 'slot-value';
+                outgoing.textContent = previousValue;
+                const incoming = document.createElement('span');
+                incoming.className = 'slot-value slot-placeholder';
+                incoming.textContent = field.type === 'date' ? 'mm/dd/yyyy' : field.placeholder;
+                layer.append(outgoing, incoming);
+                field.parentNode.appendChild(layer);
+                layers.push(layer);
+
+                animations.push(outgoing.animate([
+                    { transform: 'translateY(0)', opacity: 1 },
+                    { transform: 'translateY(120%)', opacity: 0 }
+                ], { duration: 300, easing: 'ease-in', fill: 'forwards' }));
+                animations.push(incoming.animate([
+                    { transform: 'translateY(-120%)', opacity: 0 },
+                    { transform: 'translateY(0)', opacity: 1 }
+                ], { delay: 180, duration: 450, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'both' }));
+            });
+            await Promise.allSettled(animations.map(animation => animation.finished));
+        } finally {
+            layers.forEach(layer => layer.remove());
+            animations.forEach(animation => animation.cancel());
+            fields.forEach(field => { field.readOnly = false; });
+        }
     }
 
     addTodo(task, date) {
@@ -249,11 +300,15 @@ class TodoApp {
                 todoText.style.display = 'inline-block';
                 todoInput.style.display = 'none';
 
-                // Add animation effect
+                // Restart the green flash and let the full fade finish.
+                todoText.classList.remove('saved');
+                void todoText.offsetWidth;
                 todoText.classList.add('saved');
-                setTimeout(() => {
-                    todoText.classList.remove('saved');
-                }, 500);
+                todoText.onanimationend = (event) => {
+                    if (event.animationName === 'flash') {
+                        todoText.classList.remove('saved');
+                    }
+                };
             }
         } else {
             // Cancel edit if empty or unchanged
