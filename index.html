@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Todo List</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Todo List</h1>
+        <div class="input-section">
+            <input type="text" id="todo-input" placeholder="Add a new task..." aria-label="Task (required)" required>
+            <input type="date" id="date-input" aria-label="Due date (required)" required>
+            <button id="add-btn">Add</button>
+        </div>
+        <section aria-labelledby="today-heading">
+            <h2 id="today-heading">Today</h2>
+            <ul id="todo-list" class="task-list"></ul>
+        </section>
+        <section id="todo-grid" class="grid-container" aria-labelledby="upcoming-heading" hidden>
+            <h2 id="upcoming-heading" class="grid-header">Upcoming Tasks</h2>
+            <div class="grid-content"></div>
+        </section>
+        <section id="overdue-section" aria-labelledby="overdue-heading" hidden>
+            <h2 id="overdue-heading">Overdue</h2>
+            <ul id="overdue-list" class="task-list"></ul>
+        </section>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
