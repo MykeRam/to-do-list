@@ -247,6 +247,24 @@ h2 {
     background-color: rgba(0,0,0,0.35);
 }
 
+dialog.modal-opening::backdrop {
+    animation: modalBackdropIn 0.28s ease-in-out both;
+}
+
+dialog.modal-closing::backdrop {
+    animation: modalBackdropOut 0.28s ease-in-out both;
+}
+
+@keyframes modalBackdropIn {
+    from { background-color: rgba(0,0,0,0); }
+    to { background-color: rgba(0,0,0,0.35); }
+}
+
+@keyframes modalBackdropOut {
+    from { background-color: rgba(0,0,0,0.35); }
+    to { background-color: rgba(0,0,0,0); }
+}
+
 #task-date-title {
     margin: 20px 0;
     overflow-wrap: anywhere;

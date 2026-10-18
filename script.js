@@ -13,6 +13,7 @@ class TodoApp {
         this.notesAnimation = null;
         this.notesTodoId = null;
         this.dateEditingId = null;
+        this.modalStates = new WeakMap();
         this.currentDay = this.getTodayDate();
         // Remove duplicate History records created by the previous rollover flow.
         const previousCount = this.todos.length;
@@ -84,10 +85,10 @@ class TodoApp {
             event.preventDefault();
             if (!editDate.reportValidity()) return;
             this.changeTaskDate(this.dateEditingId, editDate.value);
-            dateDialog.close();
+            this.setModalOpen(dateDialog, false);
         });
         ['task-date-close-btn', 'task-date-cancel-btn'].forEach(id => {
-            document.getElementById(id).addEventListener('click', () => dateDialog.close());
+            document.getElementById(id).addEventListener('click', () => this.setModalOpen(dateDialog, false));
         });
         dateDialog.addEventListener('close', () => {
             const item = document.querySelector(`[data-id="${this.dateEditingId}"]`);
@@ -99,14 +100,20 @@ class TodoApp {
         });
         const legend = document.getElementById('legend-dialog');
         const legendButton = document.getElementById('legend-btn');
-        legendButton.addEventListener('click', () => legend.showModal());
-        document.getElementById('legend-close-btn').addEventListener('click', () => legend.close());
+        legendButton.addEventListener('click', () => this.setModalOpen(legend, true));
+        document.getElementById('legend-close-btn').addEventListener('click', () => this.setModalOpen(legend, false));
         legend.addEventListener('close', () => legendButton.focus());
-        legend.addEventListener('click', (event) => {
-            if (event.target !== legend) return;
-            const bounds = legend.getBoundingClientRect();
-            if (event.clientX < bounds.left || event.clientX > bounds.right
-                || event.clientY < bounds.top || event.clientY > bounds.bottom) legend.close();
+        [legend, dateDialog].forEach(dialog => {
+            dialog.addEventListener('cancel', (event) => {
+                event.preventDefault();
+                this.setModalOpen(dialog, false);
+            });
+            dialog.addEventListener('click', (event) => {
+                if (event.target !== dialog) return;
+                const bounds = dialog.getBoundingClientRect();
+                if (event.clientX < bounds.left || event.clientX > bounds.right
+                    || event.clientY < bounds.top || event.clientY > bounds.bottom) this.setModalOpen(dialog, false);
+            });
         });
         document.getElementById('notes-close-btn').addEventListener('click', () => this.setNotesOpen(false));
         document.getElementById('task-notes').addEventListener('input', () => this.saveTaskNotes());
@@ -250,7 +257,7 @@ class TodoApp {
         this.dateEditingId = id;
         document.getElementById('task-date-title').textContent = todo.task;
         document.getElementById('task-edit-date').value = todo.date;
-        document.getElementById('task-date-dialog').showModal();
+        this.setModalOpen(document.getElementById('task-date-dialog'), true);
     }
 
     changeTaskDate(id, date) {
@@ -263,6 +270,44 @@ class TodoApp {
         todo.date = date;
         this.saveTodos();
         this.render(todo.id, true);
+    }
+
+    async setModalOpen(dialog, open) {
+        let state = this.modalStates.get(dialog);
+        if (!state) {
+            state = { open: Boolean(dialog.open), animation: null };
+            this.modalStates.set(dialog, state);
+        }
+        if (state.open === open) return;
+        state.open = open;
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const style = dialog.open && !reduceMotion ? window.getComputedStyle(dialog) : null;
+        const start = style
+            ? { opacity: style.opacity, transform: style.transform }
+            : { opacity: 0, transform: 'translateY(16px) scale(0.98)' };
+        state.animation?.cancel();
+        state.animation = null;
+        dialog.inert = !open;
+        dialog.classList.remove('modal-opening', 'modal-closing');
+        if (open && !dialog.open) dialog.showModal();
+        if (reduceMotion) {
+            if (!open) dialog.close();
+            dialog.inert = false;
+            return;
+        }
+        dialog.classList.add(open ? 'modal-opening' : 'modal-closing');
+        const animation = dialog.animate([
+            start,
+            { opacity: open ? 1 : 0, transform: open ? 'translateY(0) scale(1)' : 'translateY(16px) scale(0.98)' }
+        ], { duration: 280, easing: 'ease-in-out', fill: 'forwards' });
+        state.animation = animation;
+        await animation.finished.catch(() => {});
+        if (state.animation !== animation) return;
+        if (!open) dialog.close();
+        animation.cancel();
+        state.animation = null;
+        dialog.inert = false;
+        dialog.classList.remove('modal-opening', 'modal-closing');
     }
 
     async setHistoryOpen(open) {
