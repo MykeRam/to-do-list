@@ -394,7 +394,7 @@ class TodoApp {
                 const animation = fadeTarget.animate([
                     { opacity: 1 },
                     { opacity: 0 }
-                ], { duration: 700, easing: 'ease-in-out', fill: 'forwards' });
+                ], { duration: 300, easing: 'ease-in-out', fill: 'forwards' });
                 await animation.finished.catch(() => {});
             }
             this.todos = this.todos.filter(todo => todo.id !== id);
