@@ -13,6 +13,19 @@ body {
     overflow: hidden;
 }
 
+button,
+#history-link {
+    transition: background-color 0.25s ease, border-color 0.25s ease,
+        color 0.25s ease, box-shadow 0.25s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    button,
+    #history-link {
+        transition: none;
+    }
+}
+
 .container {
     max-width: 800px;
     max-height: calc(100vh - 40px);
@@ -218,7 +231,6 @@ h2 {
     color: #666;
     font-size: 26px;
     cursor: pointer;
-    transition: color 0.2s ease;
 }
 
 #history-close-btn:hover,
@@ -406,7 +418,6 @@ dialog.modal-closing::backdrop {
     background-color: white;
     color: #666;
     cursor: pointer;
-    transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 .notes-btn:hover,
@@ -492,7 +503,6 @@ dialog.modal-closing::backdrop {
     color: white;
     font: inherit;
     cursor: pointer;
-    transition: background-color 0.2s ease;
 }
 
 .rollover-actions button:hover:not(:disabled) {
@@ -554,7 +564,6 @@ dialog.modal-closing::backdrop {
     background-color: #fff8ef;
     color: #c65d00;
     cursor: pointer;
-    transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 .rollover-one-btn:hover {
@@ -654,7 +663,6 @@ dialog.modal-closing::backdrop {
     border-radius: 50%;
     background-color: white;
     cursor: pointer;
-    transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 .completion-toggle:hover {
