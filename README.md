@@ -10,6 +10,7 @@ A simple todo app built with HTML, CSS, and JavaScript.
 - Keep past-due tasks in an Overdue section.
 - Click task text to edit it, then press Enter to save. Click away to cancel.
 - Delete tasks and save changes in the browser's local storage.
+- Check off tasks with an animated green check mark, or click again to uncheck.
 - Display dates using the local calendar day.
 
 ## Run locally

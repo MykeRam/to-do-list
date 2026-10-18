@@ -87,7 +87,9 @@ class TodoApp {
 
             const id = parseInt(item.dataset.id);
 
-            if (e.target.classList.contains('delete-btn')) {
+            if (e.target.closest('.completion-toggle')) {
+                this.toggleTodo(id);
+            } else if (e.target.classList.contains('delete-btn')) {
                 this.deleteTodo(id);
             } else if (e.target.classList.contains('todo-text')) {
                 this.startEditing(id, e);
@@ -175,6 +177,7 @@ class TodoApp {
         const isNewTodo = todo.id === animateId;
         const slotEntrance = isNewTodo && useSlotEntrance;
         todoItem.className = 'todo-item';
+        if (todo.completed) todoItem.className += ' is-completed';
         if (isNewTodo) {
             todoItem.className += slotEntrance ? ' todo-slot-enter' : ' todo-enter';
         }
@@ -183,6 +186,11 @@ class TodoApp {
             ? `<span class="todo-date overdue">${this.formatDate(todo.date)}</span>`
             : '';
         const content = `
+            <button type="button" class="completion-toggle" role="checkbox" aria-checked="${Boolean(todo.completed)}" aria-label="${todo.completed ? 'Mark task incomplete' : 'Mark task complete'}">
+                <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                    <path class="completion-mark" d="M4 10l4 4 8-8" pathLength="1"></path>
+                </svg>
+            </button>
             <span class="todo-text">${this.escapeHtml(todo.task)}</span>
             ${dateHtml}
             <input type="text" class="todo-input" style="display: none;" aria-label="Edit task">
@@ -377,6 +385,21 @@ class TodoApp {
         }
 
         this.editingId = null;
+    }
+
+    toggleTodo(id) {
+        if (this.deletingIds.has(id)) return;
+        const todo = this.todos.find(todo => todo.id === id);
+        if (!todo) return;
+        todo.completed = !todo.completed;
+        this.saveTodos();
+
+        const item = document.querySelector(`[data-id="${id}"]`);
+        if (!item) return;
+        item.classList.toggle('is-completed', todo.completed);
+        const button = item.querySelector('.completion-toggle');
+        button.setAttribute('aria-checked', String(todo.completed));
+        button.setAttribute('aria-label', todo.completed ? 'Mark task incomplete' : 'Mark task complete');
     }
 
     async deleteTodo(id) {
