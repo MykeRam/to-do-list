@@ -8,7 +8,10 @@
 </head>
 <body>
     <div class="container" tabindex="0" role="region" aria-label="Todo list">
-        <h1>Todo List</h1>
+        <header class="app-header">
+            <h1>Todo List</h1>
+            <button type="button" id="legend-btn" aria-haspopup="dialog" aria-controls="legend-dialog">Legend</button>
+        </header>
         <div class="input-section">
             <div class="input-slot task-slot">
                 <input type="text" id="todo-input" placeholder="Add a new task..." aria-label="Task (required)" required>
@@ -17,7 +20,6 @@
                 <input type="date" id="date-input" aria-label="Due date (required)" required>
             </div>
             <div class="input-actions">
-                <button type="button" id="legend-btn" aria-haspopup="dialog" aria-controls="legend-dialog">Legend</button>
                 <a id="history-link" href="#history-section" aria-controls="history-section" aria-expanded="false">History</a>
                 <button id="add-btn">Add</button>
             </div>

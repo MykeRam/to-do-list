@@ -46,6 +46,14 @@ h1 {
     color: #333;
 }
 
+.app-header {
+    position: relative;
+}
+
+.app-header h1 {
+    padding-inline: 70px;
+}
+
 .input-section {
     display: flex;
     align-items: flex-end;
@@ -74,7 +82,9 @@ h1 {
 }
 
 #legend-btn {
-    align-self: flex-end;
+    position: absolute;
+    top: 0;
+    right: 0;
     padding: 0;
     border: 0;
     background: transparent;
