@@ -50,17 +50,23 @@ class TodoApp {
     }
 
     init() {
+        this.updateFooterYear();
         this.bindEvents();
         this.render();
         this.scheduleDayRollover();
     }
 
     refreshDay() {
+        this.updateFooterYear();
         const today = this.getTodayDate();
         if (today !== this.currentDay) {
             this.currentDay = today;
             this.render();
         }
+    }
+
+    updateFooterYear() {
+        document.getElementById('footer-year').textContent = new Date().getFullYear();
     }
 
     scheduleDayRollover() {
