@@ -282,6 +282,47 @@ h2 {
     font-size: 12px;
 }
 
+.todo-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rollover-one-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 6px;
+    border: 1px solid #c65d00;
+    border-radius: 4px;
+    background-color: #fff8ef;
+    color: #c65d00;
+    cursor: pointer;
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.rollover-one-btn:hover {
+    background-color: #c65d00;
+    color: white;
+}
+
+.rollover-one-btn:focus-visible {
+    outline: 2px solid #c65d00;
+    outline-offset: 3px;
+}
+
+.rollover-one-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
 #rollover-result:not(:empty) {
     margin-top: 12px;
     color: #2e7d32;

@@ -160,6 +160,8 @@ class TodoApp {
 
             if (e.target.closest('.completion-toggle')) {
                 this.toggleTodo(id);
+            } else if (e.target.closest('.rollover-one-btn')) {
+                this.rollOverTasks([id]);
             } else if (e.target.classList.contains('delete-btn')) {
                 this.deleteTodo(id);
             } else if (e.target.classList.contains('todo-text')) {
@@ -652,6 +654,21 @@ class TodoApp {
                     label.appendChild(checkbox);
                     label.appendChild(document.createTextNode('Roll over'));
                     item.prepend(label);
+
+                    const rolloverButton = document.createElement('button');
+                    rolloverButton.type = 'button';
+                    rolloverButton.className = 'rollover-one-btn';
+                    rolloverButton.title = 'Roll over to Today';
+                    rolloverButton.setAttribute('aria-label', 'Roll over this task to Today');
+                    rolloverButton.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M15 4l4 4-4 4M19 8H9a5 5 0 0 0 0 10h3"></path>
+                    </svg>`;
+                    const deleteButton = item.querySelector('.delete-btn');
+                    const actions = document.createElement('div');
+                    actions.className = 'todo-actions';
+                    deleteButton.replaceWith(actions);
+                    actions.appendChild(rolloverButton);
+                    actions.appendChild(deleteButton);
                 } else if (todo.rolledOverTo) {
                     const note = document.createElement('span');
                     note.className = 'rollover-note';
