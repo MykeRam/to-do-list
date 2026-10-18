@@ -5,6 +5,7 @@ class TodoApp {
         this.editingId = null;
         this.currentEditValue = '';
         this.deletingIds = new Set();
+        this.deletionAnimations = [];
         this.init();
     }
 
@@ -231,7 +232,7 @@ class TodoApp {
         });
     }
 
-    renderGrid(animateId = null) {
+    renderGrid(animateId = null, animateRemoval = false) {
         const groupedTodos = {};
         const todayDate = this.getTodayDate();
         this.todos.forEach(todo => {
@@ -242,8 +243,8 @@ class TodoApp {
 
         const gridContainer = document.getElementById('todo-grid');
         const gridContent = gridContainer.querySelector('.grid-content');
-        const animateLayout = animateId !== null
-            && this.todos.some(todo => todo.id === animateId && todo.date > todayDate)
+        const animateLayout = (animateRemoval || (animateId !== null
+            && this.todos.some(todo => todo.id === animateId && todo.date > todayDate)))
             && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         const previousPositions = new Map();
         if (animateLayout && !gridContainer.hidden) {
@@ -395,15 +396,19 @@ class TodoApp {
                     { opacity: 1 },
                     { opacity: 0 }
                 ], { duration: 300, easing: 'ease-in-out', fill: 'forwards' });
+                this.deletionAnimations.push(animation);
                 await animation.finished.catch(() => {});
             }
             this.todos = this.todos.filter(todo => todo.id !== id);
             this.saveTodos();
-            fadeTarget?.remove();
         } finally {
             this.deletingIds.delete(id);
-            // Let other pending deletions finish without replacing their DOM.
-            if (this.deletingIds.size === 0) this.render();
+            // Preserve the old card positions until every fade has finished.
+            if (this.deletingIds.size === 0) {
+                this.render(null, true);
+                this.deletionAnimations.forEach(animation => animation.cancel());
+                this.deletionAnimations = [];
+            }
         }
     }
 
@@ -411,7 +416,7 @@ class TodoApp {
         localStorage.setItem('todos', JSON.stringify(this.todos));
     }
 
-    render(animateId = null) {
+    render(animateId = null, animateRemoval = false) {
         this.cancelEdit();
         const todayDate = this.getTodayDate();
         const todoList = document.getElementById('todo-list');
@@ -422,7 +427,7 @@ class TodoApp {
             todoList.innerHTML = '<li class="empty-message">No tasks for today. Add one above!</li>';
         }
 
-        this.renderGrid(animateId);
+        this.renderGrid(animateId, animateRemoval);
 
         // Keep unfinished past tasks accessible without mixing them into Today.
         const overdueSection = document.getElementById('overdue-section');
