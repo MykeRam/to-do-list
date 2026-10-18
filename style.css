@@ -309,7 +309,6 @@ h2 {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
     gap: 1px;
-    background-color: #ddd;
 }
 
 .grid-item {
