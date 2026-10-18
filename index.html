@@ -51,6 +51,16 @@
             <p id="rollover-result" role="status"></p>
             <div id="history-content"></div>
         </section>
+        <section id="notes-section" aria-labelledby="notes-heading" tabindex="0" hidden>
+            <div class="history-header">
+                <h2 id="notes-heading">Task notes</h2>
+                <button type="button" id="notes-close-btn" aria-label="Close task notes">&times;</button>
+            </div>
+            <p id="notes-task-title"></p>
+            <label for="task-notes">Detailed notes</label>
+            <textarea id="task-notes" placeholder="Add details, ideas, or next steps…"></textarea>
+            <p id="notes-save-status" role="status">Notes save automatically.</p>
+        </section>
     </div>
     <script src="script.js"></script>
 </body>

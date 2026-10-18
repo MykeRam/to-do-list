@@ -156,7 +156,8 @@ h2 {
     color: #333;
 }
 
-#history-section {
+#history-section,
+#notes-section {
     position: fixed;
     top: 20px;
     right: 20px;
@@ -175,8 +176,15 @@ h2 {
     z-index: 10;
 }
 
+#notes-section {
+    left: 20px;
+    right: auto;
+    z-index: 11;
+}
+
 @media (min-width: 1280px) {
-    #history-section {
+    #history-section,
+    #notes-section {
         width: min(340px, calc((100vw - 800px) / 2 - 32px));
     }
 }
@@ -188,7 +196,8 @@ h2 {
     gap: 10px;
 }
 
-#history-close-btn {
+#history-close-btn,
+#notes-close-btn {
     padding: 0 4px;
     border: 0;
     background: transparent;
@@ -198,8 +207,82 @@ h2 {
     transition: color 0.2s ease;
 }
 
-#history-close-btn:hover {
+#history-close-btn:hover,
+#notes-close-btn:hover {
     color: #222;
+}
+
+#notes-task-title {
+    margin: 20px 0;
+    font-weight: bold;
+    overflow-wrap: anywhere;
+}
+
+#notes-section label {
+    display: block;
+    margin-bottom: 8px;
+    color: #666;
+    font-size: 14px;
+}
+
+#task-notes {
+    display: block;
+    width: 100%;
+    min-height: 300px;
+    resize: vertical;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font: 15px/1.6 Arial, sans-serif;
+}
+
+#task-notes:focus-visible {
+    outline: 2px solid #2e7d32;
+    outline-offset: 2px;
+}
+
+#notes-save-status {
+    margin-top: 10px;
+    color: #666;
+    font-size: 12px;
+}
+
+.notes-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    padding: 6px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    background-color: white;
+    color: #666;
+    cursor: pointer;
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.notes-btn:hover,
+.notes-btn.has-notes {
+    background-color: #e8f5e8;
+    border-color: #2e7d32;
+    color: #2e7d32;
+}
+
+.notes-btn:focus-visible {
+    outline: 2px solid #2e7d32;
+    outline-offset: 3px;
+}
+
+.notes-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 #history-content .todo-text {

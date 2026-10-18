@@ -9,6 +9,9 @@ class TodoApp {
         this.todayLayoutAnimation = null;
         this.historyOpen = false;
         this.historyAnimation = null;
+        this.notesOpen = false;
+        this.notesAnimation = null;
+        this.notesTodoId = null;
         this.currentDay = this.getTodayDate();
         // Give older undated tasks a stable day so they can enter History too.
         if (this.todos.some(todo => !todo.date)) {
@@ -48,6 +51,8 @@ class TodoApp {
         const addButton = document.getElementById('add-btn');
         const todoList = document.querySelector('.container');
         const fields = [input, dateInput];
+        document.getElementById('notes-close-btn').addEventListener('click', () => this.setNotesOpen(false));
+        document.getElementById('task-notes').addEventListener('input', () => this.saveTaskNotes());
 
         const historyLink = document.getElementById('history-link');
         historyLink.addEventListener('click', (event) => {
@@ -155,6 +160,8 @@ class TodoApp {
 
             if (e.target.closest('.completion-toggle')) {
                 this.toggleTodo(id);
+            } else if (e.target.closest('.notes-btn')) {
+                this.openTaskNotes(id);
             } else if (e.target.closest('.rollover-one-btn')) {
                 this.rollOverTasks([id]);
             } else if (e.target.classList.contains('delete-btn')) {
@@ -187,7 +194,42 @@ class TodoApp {
         const link = document.getElementById('history-link');
         link.setAttribute('aria-expanded', String(open));
         if (!open) link.focus();
+        await this.animateSidePanel(panel, open, 'historyAnimation');
+    }
 
+    async setNotesOpen(open) {
+        if (open === this.notesOpen) return;
+        this.notesOpen = open;
+        if (!open) {
+            const item = document.querySelector(`[data-id="${this.notesTodoId}"]`);
+            (item?.querySelector('.notes-btn') || document.getElementById('todo-input')).focus();
+        }
+        await this.animateSidePanel(document.getElementById('notes-section'), open, 'notesAnimation');
+    }
+
+    openTaskNotes(id) {
+        const todo = this.todos.find(todo => todo.id === id);
+        if (!todo || this.deletingIds.has(id)) return;
+        this.notesTodoId = id;
+        document.getElementById('notes-task-title').textContent = todo.task;
+        document.getElementById('task-notes').value = todo.notes || '';
+        document.getElementById('notes-save-status').textContent = 'Notes save automatically.';
+        this.setNotesOpen(true).then(() => {
+            if (this.notesOpen && this.notesTodoId === id) document.getElementById('task-notes').focus();
+        });
+    }
+
+    saveTaskNotes() {
+        const todo = this.todos.find(todo => todo.id === this.notesTodoId);
+        if (!todo || this.deletingIds.has(todo.id)) return;
+        todo.notes = document.getElementById('task-notes').value;
+        this.saveTodos();
+        const item = document.querySelector(`[data-id="${todo.id}"]`);
+        item?.querySelector('.notes-btn')?.classList.toggle('has-notes', Boolean(todo.notes.trim()));
+        document.getElementById('notes-save-status').textContent = 'Notes saved.';
+    }
+
+    async animateSidePanel(panel, open, animationKey) {
         const offscreen = 'translateY(calc(100% + 40px))';
         const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         // Start from the current position when the user reverses mid-animation.
@@ -195,8 +237,8 @@ class TodoApp {
         const start = style
             ? { transform: style.transform, opacity: style.opacity }
             : { transform: offscreen, opacity: 0 };
-        this.historyAnimation?.cancel();
-        this.historyAnimation = null;
+        this[animationKey]?.cancel();
+        this[animationKey] = null;
         panel.inert = !open;
         if (reduceMotion) {
             panel.hidden = !open;
@@ -208,12 +250,12 @@ class TodoApp {
             start,
             { transform: open ? 'translateY(0)' : offscreen, opacity: open ? 1 : 0 }
         ], { duration: 450, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' });
-        this.historyAnimation = animation;
+        this[animationKey] = animation;
         await animation.finished.catch(() => {});
-        if (this.historyAnimation !== animation) return;
+        if (this[animationKey] !== animation) return;
         panel.hidden = !open;
         animation.cancel();
-        this.historyAnimation = null;
+        this[animationKey] = null;
     }
 
     async animateInputReset(fields) {
@@ -299,7 +341,14 @@ class TodoApp {
             <span class="todo-text">${this.escapeHtml(todo.task)}</span>
             ${dateHtml}
             <input type="text" class="todo-input" style="display: none;" aria-label="Edit task">
-            <button class="delete-btn">Delete</button>
+            <div class="todo-actions">
+                <button type="button" class="notes-btn${todo.notes?.trim() ? ' has-notes' : ''}" aria-label="Edit task notes" aria-controls="notes-section" title="Task notes">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M14 3H5v18h14V8l-5-5ZM14 3v5h5M8 12h8M8 16h6"></path>
+                    </svg>
+                </button>
+                <button class="delete-btn">Delete</button>
+            </div>
         `;
         todoItem.innerHTML = slotEntrance
             ? `<div class="todo-slot-content">${content}</div>`
@@ -344,6 +393,7 @@ class TodoApp {
                 task: todo.task,
                 date: today,
                 completed: false,
+                notes: todo.notes || '',
                 rolledOverFrom: todo.date
             });
             // Keep the original day's record and prevent rolling it over twice.
@@ -641,6 +691,11 @@ class TodoApp {
 
         this.renderHistory(todayDate);
         this.renderRolloverPrompt();
+        if (this.notesOpen) {
+            const selected = this.todos.find(todo => todo.id === this.notesTodoId);
+            if (!selected) this.setNotesOpen(false);
+            else document.getElementById('notes-task-title').textContent = selected.task;
+        }
     }
 
     renderHistory(todayDate) {
@@ -694,12 +749,7 @@ class TodoApp {
                     rolloverButton.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                         <path d="M15 4l4 4-4 4M19 8H9a5 5 0 0 0 0 10h3"></path>
                     </svg>`;
-                    const deleteButton = item.querySelector('.delete-btn');
-                    const actions = document.createElement('div');
-                    actions.className = 'todo-actions';
-                    deleteButton.replaceWith(actions);
-                    actions.appendChild(rolloverButton);
-                    actions.appendChild(deleteButton);
+                    item.querySelector('.todo-actions').prepend(rolloverButton);
                 } else if (todo.rolledOverTo) {
                     const note = document.createElement('span');
                     note.className = 'rollover-note';

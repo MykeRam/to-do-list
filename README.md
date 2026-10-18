@@ -12,6 +12,8 @@ A simple todo app built with HTML, CSS, and JavaScript.
 - Review unfinished tasks from any previous day and roll over all or selected tasks to Today in orange.
 - Preserve the original History entries and prevent duplicate rollovers.
 - Use the arrow beside Delete to roll over any unfinished past task individually.
+- Open the note icon beside Delete to write detailed task notes in a matching left-side panel.
+- Notes save automatically, stay with tasks in History, and carry forward on rollover.
 - Click task text to edit it, then press Enter to save. Click away to cancel.
 - Delete tasks and save changes in the browser's local storage.
 - Check off tasks with an animated green check mark, or click again to uncheck.
