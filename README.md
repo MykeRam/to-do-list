@@ -7,7 +7,8 @@ A simple todo app built with HTML, CSS, and JavaScript.
 - Require task text and a due date, with shake feedback for missing information.
 - List today's tasks in the order they were added.
 - Group future tasks by date in a responsive grid.
-- Keep past-due tasks in an Overdue section.
+- Open History above the Add button to view past tasks grouped by date.
+- Move today's tasks to History at local midnight and bring the next day's tasks into Today.
 - Click task text to edit it, then press Enter to save. Click away to cancel.
 - Delete tasks and save changes in the browser's local storage.
 - Check off tasks with an animated green check mark, or click again to uncheck.

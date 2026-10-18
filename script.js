@@ -7,12 +7,37 @@ class TodoApp {
         this.deletingIds = new Set();
         this.deletionAnimations = [];
         this.todayLayoutAnimation = null;
+        this.currentDay = this.getTodayDate();
+        // Give older undated tasks a stable day so they can enter History too.
+        if (this.todos.some(todo => !todo.date)) {
+            this.todos.forEach(todo => { if (!todo.date) todo.date = this.currentDay; });
+            this.saveTodos();
+        }
         this.init();
     }
 
     init() {
         this.bindEvents();
         this.render();
+        this.scheduleDayRollover();
+    }
+
+    refreshDay() {
+        const today = this.getTodayDate();
+        if (today !== this.currentDay) {
+            this.currentDay = today;
+            this.render();
+        }
+    }
+
+    scheduleDayRollover() {
+        clearTimeout(this.dayRolloverTimer);
+        const now = new Date();
+        const nextDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+        this.dayRolloverTimer = setTimeout(() => {
+            this.refreshDay();
+            this.scheduleDayRollover();
+        }, nextDay.getTime() - now.getTime() + 50);
     }
 
     bindEvents() {
@@ -21,6 +46,24 @@ class TodoApp {
         const addButton = document.getElementById('add-btn');
         const todoList = document.querySelector('.container');
         const fields = [input, dateInput];
+
+        const historyLink = document.getElementById('history-link');
+        const historySection = document.getElementById('history-section');
+        historyLink.addEventListener('click', (event) => {
+            event.preventDefault();
+            this.refreshDay();
+            historySection.hidden = !historySection.hidden;
+            historyLink.setAttribute('aria-expanded', String(!historySection.hidden));
+            if (!historySection.hidden) historySection.scrollIntoView({ block: 'nearest' });
+        });
+        const checkDay = () => {
+            this.refreshDay();
+            this.scheduleDayRollover();
+        };
+        window.addEventListener('focus', checkDay);
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) checkDay();
+        });
 
         const updateValidity = (field) => {
             if (field === input) {
@@ -487,13 +530,38 @@ class TodoApp {
 
         this.renderGrid(animateId, animateRemoval);
 
-        // Keep unfinished past tasks accessible without mixing them into Today.
-        const overdueSection = document.getElementById('overdue-section');
-        const overdueList = document.getElementById('overdue-list');
-        const overdueTodos = this.todos.filter(todo => todo.date && todo.date < todayDate);
-        overdueSection.hidden = overdueTodos.length === 0;
-        overdueList.innerHTML = '';
-        overdueTodos.forEach(todo => overdueList.appendChild(this.createTodoElement(todo, true, animateId)));
+        this.renderHistory(todayDate);
+    }
+
+    renderHistory(todayDate) {
+        const content = document.getElementById('history-content');
+        content.innerHTML = '';
+        const grouped = {};
+        this.todos.forEach(todo => {
+            if (todo.date < todayDate) (grouped[todo.date] ||= []).push(todo);
+        });
+        const dates = Object.keys(grouped).sort().reverse();
+        if (dates.length === 0) {
+            const message = document.createElement('p');
+            message.className = 'empty-message';
+            message.textContent = 'No past tasks yet. Today’s tasks will appear here when the day ends.';
+            content.appendChild(message);
+        }
+        dates.forEach(date => {
+            const day = document.createElement('section');
+            day.className = 'history-day';
+            const heading = document.createElement('h3');
+            heading.className = 'history-date';
+            heading.textContent = this.parseLocalDate(date).toLocaleDateString('en-US', {
+                weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
+            });
+            const list = document.createElement('ul');
+            list.className = 'task-list';
+            grouped[date].forEach(todo => list.appendChild(this.createTodoElement(todo)));
+            day.appendChild(heading);
+            day.appendChild(list);
+            content.appendChild(day);
+        });
     }
 
     escapeHtml(text) {

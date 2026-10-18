@@ -27,8 +27,26 @@ h1 {
 
 .input-section {
     display: flex;
+    align-items: flex-end;
     margin-bottom: 32px;
     gap: 10px;
+}
+
+.input-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#history-link {
+    color: #2e7d32;
+    font-size: 14px;
+    text-align: right;
+    text-underline-offset: 3px;
+}
+
+#history-link:hover {
+    color: #1b5e20;
 }
 
 .input-slot {
@@ -124,8 +142,17 @@ h2 {
     color: #333;
 }
 
-#overdue-section {
+#history-section {
     margin-top: 30px;
+}
+
+.history-day {
+    margin-top: 20px;
+}
+
+.history-date {
+    color: #666;
+    font-size: 15px;
 }
 
 .todo-item {
