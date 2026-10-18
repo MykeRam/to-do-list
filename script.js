@@ -313,10 +313,8 @@ class TodoApp {
     }
 
     getRolloverCandidates() {
-        const yesterday = this.parseLocalDate(this.getTodayDate());
-        yesterday.setDate(yesterday.getDate() - 1);
-        const key = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
-        return this.todos.filter(todo => todo.date === key && !todo.completed && !todo.rolledOverTo
+        const today = this.getTodayDate();
+        return this.todos.filter(todo => todo.date < today && !todo.completed && !todo.rolledOverTo
             && !this.deletingIds.has(todo.id));
     }
 
@@ -330,7 +328,7 @@ class TodoApp {
         const dismissed = localStorage.getItem('rolloverPromptDismissed') === this.getTodayDate();
         document.getElementById('rollover-prompt').hidden = count === 0 || dismissed;
         document.getElementById('rollover-message').textContent =
-            `You have ${count} unfinished ${count === 1 ? 'task' : 'tasks'} from yesterday. Would you like to roll any over to today?`;
+            `You have ${count} unfinished ${count === 1 ? 'task' : 'tasks'} from previous days. Would you like to roll any over to today?`;
     }
 
     rollOverTasks(ids) {
@@ -685,7 +683,9 @@ class TodoApp {
                     label.appendChild(checkbox);
                     label.appendChild(document.createTextNode('Roll over'));
                     item.prepend(label);
+                }
 
+                if (eligibleIds.has(todo.id)) {
                     const rolloverButton = document.createElement('button');
                     rolloverButton.type = 'button';
                     rolloverButton.className = 'rollover-one-btn';
