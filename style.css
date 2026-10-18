@@ -210,7 +210,8 @@ h2 {
 
 #history-close-btn,
 #notes-close-btn,
-#legend-close-btn {
+#legend-close-btn,
+#task-date-close-btn {
     padding: 0 4px;
     border: 0;
     background: transparent;
@@ -222,11 +223,13 @@ h2 {
 
 #history-close-btn:hover,
 #notes-close-btn:hover,
-#legend-close-btn:hover {
+#legend-close-btn:hover,
+#task-date-close-btn:hover {
     color: #222;
 }
 
-#legend-dialog {
+#legend-dialog,
+#task-date-dialog {
     width: min(520px, calc(100vw - 40px));
     max-height: calc(100vh - 40px);
     max-height: calc(100dvh - 40px);
@@ -239,8 +242,28 @@ h2 {
     color: #333;
 }
 
-#legend-dialog::backdrop {
+#legend-dialog::backdrop,
+#task-date-dialog::backdrop {
     background-color: rgba(0,0,0,0.35);
+}
+
+#task-date-title {
+    margin: 20px 0;
+    overflow-wrap: anywhere;
+}
+
+#task-date-form label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+#task-edit-date {
+    width: 100%;
+    height: 42px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font: inherit;
 }
 
 .legend-entry {
@@ -296,6 +319,12 @@ h2 {
     color: #c65d00;
 }
 
+.legend-delete {
+    color: white;
+    border-color: #f44336;
+    background-color: #f44336;
+}
+
 #notes-task-title {
     margin: 20px 0;
     font-weight: bold;
@@ -344,7 +373,9 @@ h2 {
     margin-top: 8px;
 }
 
-.notes-btn {
+.notes-btn,
+.calendar-btn,
+.delete-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -361,18 +392,27 @@ h2 {
 }
 
 .notes-btn:hover,
-.notes-btn.has-notes {
+.notes-btn.has-notes,
+.calendar-btn:hover {
     background-color: #e8f5e8;
     border-color: #2e7d32;
     color: #2e7d32;
 }
 
-.notes-btn:focus-visible {
+.notes-btn:focus-visible,
+.calendar-btn:focus-visible {
     outline: 2px solid #2e7d32;
     outline-offset: 3px;
 }
 
-.notes-btn svg {
+.delete-btn:focus-visible {
+    outline: 2px solid #d32f2f;
+    outline-offset: 3px;
+}
+
+.notes-btn svg,
+.calendar-btn svg,
+.delete-btn svg {
     width: 20px;
     height: 20px;
     fill: none;
@@ -708,12 +748,7 @@ h2 {
 .delete-btn {
     background-color: #f44336;
     color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.25s ease;
+    border-color: #f44336;
 }
 
 .delete-btn:hover {
@@ -827,11 +862,6 @@ h2 {
 .grid-item .todo-text {
     min-width: 80px;
     margin-right: 0;
-}
-
-.grid-item .delete-btn {
-    padding: 6px 8px;
-    font-size: 12px;
 }
 
 .grid-item .task-item {

@@ -12,6 +12,7 @@ class TodoApp {
         this.notesOpen = false;
         this.notesAnimation = null;
         this.notesTodoId = null;
+        this.dateEditingId = null;
         this.currentDay = this.getTodayDate();
         // Remove duplicate History records created by the previous rollover flow.
         const previousCount = this.todos.length;
@@ -77,6 +78,25 @@ class TodoApp {
         const addButton = document.getElementById('add-btn');
         const todoList = document.querySelector('.container');
         const fields = [input, dateInput];
+        const dateDialog = document.getElementById('task-date-dialog');
+        const editDate = document.getElementById('task-edit-date');
+        document.getElementById('task-date-form').addEventListener('submit', (event) => {
+            event.preventDefault();
+            if (!editDate.reportValidity()) return;
+            this.changeTaskDate(this.dateEditingId, editDate.value);
+            dateDialog.close();
+        });
+        ['task-date-close-btn', 'task-date-cancel-btn'].forEach(id => {
+            document.getElementById(id).addEventListener('click', () => dateDialog.close());
+        });
+        dateDialog.addEventListener('close', () => {
+            const item = document.querySelector(`[data-id="${this.dateEditingId}"]`);
+            const task = this.todos.find(todo => todo.id === this.dateEditingId);
+            const inHiddenHistory = task?.date < this.getTodayDate()
+                && document.getElementById('history-section').hidden;
+            (inHiddenHistory ? input : item?.querySelector('.calendar-btn') || input).focus();
+            this.dateEditingId = null;
+        });
         const legend = document.getElementById('legend-dialog');
         const legendButton = document.getElementById('legend-btn');
         legendButton.addEventListener('click', () => legend.showModal());
@@ -195,11 +215,13 @@ class TodoApp {
 
             if (e.target.closest('.completion-toggle')) {
                 this.toggleTodo(id);
+            } else if (e.target.closest('.calendar-btn')) {
+                this.openTaskDate(id);
             } else if (e.target.closest('.notes-btn')) {
                 this.openTaskNotes(id);
             } else if (e.target.closest('.rollover-one-btn')) {
                 this.rollOverTasks([id]);
-            } else if (e.target.classList.contains('delete-btn')) {
+            } else if (e.target.closest('.delete-btn')) {
                 this.deleteTodo(id);
             } else if (e.target.classList.contains('todo-text')) {
                 this.startEditing(id, e);
@@ -220,6 +242,27 @@ class TodoApp {
                 this.saveEdit();
             }
         });
+    }
+
+    openTaskDate(id) {
+        const todo = this.todos.find(todo => todo.id === id);
+        if (!todo || this.deletingIds.has(id)) return;
+        this.dateEditingId = id;
+        document.getElementById('task-date-title').textContent = todo.task;
+        document.getElementById('task-edit-date').value = todo.date;
+        document.getElementById('task-date-dialog').showModal();
+    }
+
+    changeTaskDate(id, date) {
+        const todo = this.todos.find(todo => todo.id === id);
+        if (!todo || this.deletingIds.has(id) || !date || date === todo.date) return;
+        const parsed = this.parseLocalDate(date);
+        if (Number.isNaN(parsed.getTime()) || parsed.getFullYear() !== Number(date.split('-')[0])
+            || parsed.getMonth() + 1 !== Number(date.split('-')[1])
+            || parsed.getDate() !== Number(date.split('-')[2])) return;
+        todo.date = date;
+        this.saveTodos();
+        this.render(todo.id, true);
     }
 
     async setHistoryOpen(open) {
@@ -378,12 +421,21 @@ class TodoApp {
             ${dateHtml}
             <input type="text" class="todo-input" style="display: none;" aria-label="Edit task">
             <div class="todo-actions">
+                <button type="button" class="calendar-btn" aria-label="Change task date" aria-haspopup="dialog" aria-controls="task-date-dialog" title="Change task date">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M4 5h16v16H4zM4 10h16M8 3v4M16 3v4M8 14h2M14 14h2M8 17h2"></path>
+                    </svg>
+                </button>
                 <button type="button" class="notes-btn${todo.notes?.trim() ? ' has-notes' : ''}" aria-label="Edit task notes" aria-controls="notes-section" title="Task notes">
                     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                         <path d="M14 3H5v18h14V8l-5-5ZM14 3v5h5M8 12h8M8 16h6"></path>
                     </svg>
                 </button>
-                <button class="delete-btn">Delete</button>
+                <button type="button" class="delete-btn" aria-label="Delete task" title="Delete task">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M6 6l12 12M18 6L6 18"></path>
+                    </svg>
+                </button>
             </div>
         `;
         todoItem.innerHTML = slotEntrance

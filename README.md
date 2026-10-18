@@ -13,6 +13,7 @@ A simple todo app built with HTML, CSS, and JavaScript.
 - Move rolled-over tasks out of History into Today and show read-only rollover dates below their notes.
 - Use the arrow beside Delete to roll over any unfinished past task individually.
 - Open the note icon beside Delete to write detailed task notes in a matching left-side panel.
+- Use the calendar icon to change a task's due date and move it to the matching section.
 - Notes save automatically, stay with tasks in History, and carry forward on rollover.
 - Click task text to edit it, then press Enter to save. Click away to cancel.
 - Delete tasks and save changes in the browser's local storage.

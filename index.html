@@ -63,6 +63,21 @@
             <div id="notes-rollover-log" hidden></div>
         </section>
     </div>
+    <dialog id="task-date-dialog" aria-labelledby="task-date-heading">
+        <form id="task-date-form">
+            <div class="history-header">
+                <h2 id="task-date-heading">Change task date</h2>
+                <button type="button" id="task-date-close-btn" aria-label="Close date editor">&times;</button>
+            </div>
+            <p id="task-date-title"></p>
+            <label for="task-edit-date">Due date</label>
+            <input type="date" id="task-edit-date" required>
+            <div class="rollover-actions">
+                <button type="button" id="task-date-cancel-btn">Cancel</button>
+                <button type="submit">Save date</button>
+            </div>
+        </form>
+    </dialog>
     <dialog id="legend-dialog" aria-labelledby="legend-heading">
         <div class="history-header">
             <h2 id="legend-heading">Legend</h2>
@@ -72,6 +87,10 @@
             <div class="legend-entry">
                 <dt><span class="legend-symbol legend-check" aria-hidden="true">✓</span>Completion bubble</dt>
                 <dd>Click the empty bubble to mark a task complete. Click again to uncheck it.</dd>
+            </div>
+            <div class="legend-entry">
+                <dt><span class="legend-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v16H4zM4 10h16M8 3v4M16 3v4M8 14h2M14 14h2M8 17h2"></path></svg></span>Calendar</dt>
+                <dd>Change the task’s due date. It moves into Today, Upcoming Tasks, or History to match the new date.</dd>
             </div>
             <div class="legend-entry">
                 <dt><span class="legend-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 3H5v18h14V8l-5-5ZM14 3v5h5M8 12h8M8 16h6"></path></svg></span>Notes</dt>
@@ -94,7 +113,7 @@
                 <dd>This task was rolled over from a previous day.</dd>
             </div>
             <div class="legend-entry">
-                <dt>Delete</dt>
+                <dt><span class="legend-symbol legend-delete" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"></path></svg></span>Delete</dt>
                 <dd>Remove the task and its notes.</dd>
             </div>
         </dl>
