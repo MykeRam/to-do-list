@@ -4,6 +4,7 @@ class TodoApp {
         this.todos = JSON.parse(localStorage.getItem('todos')) || [];
         this.editingId = null;
         this.currentEditValue = '';
+        this.deletingIds = new Set();
         this.init();
     }
 
@@ -294,6 +295,7 @@ class TodoApp {
     }
 
     startEditing(id, clickEvent) {
+        if (this.deletingIds.has(id)) return;
         // Cancel any existing edit
         this.cancelEdit();
 
@@ -375,11 +377,34 @@ class TodoApp {
         this.editingId = null;
     }
 
-    deleteTodo(id) {
-        this.todos = this.todos.filter(todo => todo.id !== id);
-        this.saveTodos();
+    async deleteTodo(id) {
+        if (this.deletingIds.has(id)) return;
+        this.deletingIds.add(id);
+        const todoItem = document.querySelector(`[data-id="${id}"]`);
+        let fadeTarget = todoItem;
+        const card = todoItem?.closest('.grid-item');
+        if (card && card.querySelectorAll('.todo-item').length === 1) {
+            fadeTarget = card;
+            const grid = document.getElementById('todo-grid');
+            if (grid.querySelectorAll('.todo-item').length === 1) fadeTarget = grid;
+        }
 
-        this.render();
+        try {
+            if (fadeTarget && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                const animation = fadeTarget.animate([
+                    { opacity: 1 },
+                    { opacity: 0 }
+                ], { duration: 700, easing: 'ease-in-out', fill: 'forwards' });
+                await animation.finished.catch(() => {});
+            }
+            this.todos = this.todos.filter(todo => todo.id !== id);
+            this.saveTodos();
+            fadeTarget?.remove();
+        } finally {
+            this.deletingIds.delete(id);
+            // Let other pending deletions finish without replacing their DOM.
+            if (this.deletingIds.size === 0) this.render();
+        }
     }
 
     saveTodos() {
