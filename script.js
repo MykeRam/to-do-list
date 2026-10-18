@@ -445,9 +445,15 @@ class TodoApp {
         const todayDate = this.getTodayDate();
         const todoList = document.getElementById('todo-list');
         const todayTodos = this.todos.filter(todo => !todo.date || todo.date === todayDate);
-        const animateTodayLayout = todayTodos.some(todo => todo.id === animateId)
+        const animateTodayLayout = (animateRemoval || todayTodos.some(todo => todo.id === animateId))
             && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         const previousHeight = animateTodayLayout ? todoList.getBoundingClientRect().height : null;
+        const previousRows = new Map();
+        if (animateRemoval && animateTodayLayout) {
+            Array.from(todoList.children).forEach(row => {
+                previousRows.set(row.dataset.id, row.getBoundingClientRect());
+            });
+        }
         this.todayLayoutAnimation?.cancel();
         this.todayLayoutAnimation = null;
         todoList.innerHTML = '';
@@ -458,8 +464,20 @@ class TodoApp {
 
         if (animateTodayLayout) {
             const nextHeight = todoList.getBoundingClientRect().height;
+            const rowPositions = Array.from(todoList.children).map(row => ({
+                row,
+                previous: previousRows.get(row.dataset.id),
+                next: row.getBoundingClientRect()
+            }));
+            rowPositions.forEach(({ row, previous, next }) => {
+                if (!previous || previous.top === next.top) return;
+                row.animate([
+                    { transform: `translateY(${previous.top - next.top}px)` },
+                    { transform: 'translateY(0)' }
+                ], { duration: 600, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+            });
             if (previousHeight !== nextHeight) {
-                // Grow the actual list so every section below it moves together.
+                // Resize the list so every section below it moves together.
                 this.todayLayoutAnimation = todoList.animate([
                     { height: `${previousHeight}px`, overflow: 'hidden' },
                     { height: `${nextHeight}px`, overflow: 'hidden' }
