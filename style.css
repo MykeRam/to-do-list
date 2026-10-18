@@ -331,6 +331,19 @@ h2 {
     font-size: 12px;
 }
 
+#notes-rollover-log {
+    margin-top: 18px;
+    padding-top: 12px;
+    border-top: 1px solid #ddd;
+    color: #c65d00;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+#notes-rollover-log p + p {
+    margin-top: 8px;
+}
+
 .notes-btn {
     display: inline-flex;
     align-items: center;

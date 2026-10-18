@@ -10,7 +10,7 @@ A simple todo app built with HTML, CSS, and JavaScript.
 - Open History above the Add button to view past tasks grouped by date in a right-side panel.
 - Move today's tasks to History at local midnight and bring the next day's tasks into Today.
 - Roll over all unfinished past tasks, a single day's unfinished tasks, or individual tasks to Today in orange.
-- Move rolled-over tasks out of History into Today and record each rollover date in their notes.
+- Move rolled-over tasks out of History into Today and show read-only rollover dates below their notes.
 - Use the arrow beside Delete to roll over any unfinished past task individually.
 - Open the note icon beside Delete to write detailed task notes in a matching left-side panel.
 - Notes save automatically, stay with tasks in History, and carry forward on rollover.

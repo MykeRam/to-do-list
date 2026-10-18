@@ -19,7 +19,22 @@ class TodoApp {
         let migrated = this.todos.length !== previousCount;
         this.todos.forEach(todo => {
             if (todo.rolledOverFrom && !Array.isArray(todo.rolloverLog)) {
-                this.appendRolloverNote(todo, todo.rolledOverFrom, todo.date);
+                todo.rolloverLog = [{ from: todo.rolledOverFrom, to: todo.date }];
+                migrated = true;
+            }
+            if (Array.isArray(todo.rolloverLog) && !todo.rolloverNotesSeparated) {
+                const generatedLines = new Set(todo.rolloverLog.map(entry =>
+                    `Rolled over on ${entry.to} from ${entry.from}.`));
+                const lines = (todo.notes || '').split('\n');
+                for (let i = lines.length - 1; i >= 0; i--) {
+                    if (!generatedLines.has(lines[i])) continue;
+                    if (i > 0 && lines[i - 1] === '') {
+                        lines.splice(i - 1, 2);
+                        i--;
+                    } else lines.splice(i, 1);
+                }
+                todo.notes = lines.join('\n');
+                todo.rolloverNotesSeparated = true;
                 migrated = true;
             }
         });
@@ -234,6 +249,7 @@ class TodoApp {
         document.getElementById('notes-task-title').textContent = todo.task;
         document.getElementById('task-notes').value = todo.notes || '';
         document.getElementById('notes-save-status').textContent = 'Notes save automatically.';
+        this.renderNotesRollover(todo);
         this.setNotesOpen(true).then(() => {
             if (this.notesOpen && this.notesTodoId === id) document.getElementById('task-notes').focus();
         });
@@ -408,13 +424,9 @@ class TodoApp {
         const today = this.getTodayDate();
         candidates.forEach(todo => {
             const previousDate = todo.date;
-            this.appendRolloverNote(todo, previousDate, today);
+            this.recordRollover(todo, previousDate, today);
             todo.date = today;
             todo.rolledOverFrom = previousDate;
-            if (this.notesOpen && this.notesTodoId === todo.id) {
-                document.getElementById('task-notes').value = todo.notes;
-                document.getElementById('notes-save-status').textContent = 'Notes saved.';
-            }
         });
         this.saveTodos();
         this.render();
@@ -422,10 +434,20 @@ class TodoApp {
             `${candidates.length} ${candidates.length === 1 ? 'task rolled' : 'tasks rolled'} over to Today.`;
     }
 
-    appendRolloverNote(todo, from, to) {
-        const entry = `Rolled over on ${to} from ${from}.`;
-        todo.notes = todo.notes ? `${todo.notes}\n\n${entry}` : entry;
+    recordRollover(todo, from, to) {
         todo.rolloverLog = [...(todo.rolloverLog || []), { from, to }];
+        todo.rolloverNotesSeparated = true;
+    }
+
+    renderNotesRollover(todo) {
+        const log = document.getElementById('notes-rollover-log');
+        log.innerHTML = '';
+        log.hidden = !todo.rolloverLog?.length;
+        (todo.rolloverLog || []).forEach(entry => {
+            const line = document.createElement('p');
+            line.textContent = `Rolled over on ${entry.to} from ${entry.from}.`;
+            log.appendChild(line);
+        });
     }
 
     parseLocalDate(dateString) {
@@ -717,7 +739,10 @@ class TodoApp {
         if (this.notesOpen) {
             const selected = this.todos.find(todo => todo.id === this.notesTodoId);
             if (!selected) this.setNotesOpen(false);
-            else document.getElementById('notes-task-title').textContent = selected.task;
+            else {
+                document.getElementById('notes-task-title').textContent = selected.task;
+                this.renderNotesRollover(selected);
+            }
         }
     }
 

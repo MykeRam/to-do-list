@@ -60,6 +60,7 @@
             <label for="task-notes">Detailed notes</label>
             <textarea id="task-notes" placeholder="Add details, ideas, or next steps…"></textarea>
             <p id="notes-save-status" role="status">Notes save automatically.</p>
+            <div id="notes-rollover-log" hidden></div>
         </section>
     </div>
     <dialog id="legend-dialog" aria-labelledby="legend-heading">
@@ -82,7 +83,7 @@
             </div>
             <div class="legend-entry">
                 <dt><span class="legend-symbol legend-orange" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 4l4 4-4 4M19 8H9a5 5 0 0 0 0 10h3"></path></svg></span>Roll over</dt>
-                <dd>Move an unfinished past task from History into Today. Use the checkbox beside a History date to roll over that day’s unfinished tasks together. Notes record the rollover date.</dd>
+                <dd>Move an unfinished past task from History into Today. Use the checkbox beside a History date to roll over that day’s unfinished tasks together. Read-only rollover dates appear below the task’s notes.</dd>
             </div>
             <div class="legend-entry">
                 <dt>History</dt>
