@@ -134,7 +134,16 @@ h2 {
     align-items: center;
     padding: 12px;
     border-bottom: 1px solid #eee;
-    animation: fadeIn 0.3s;
+}
+
+.todo-enter {
+    animation: fadeIn 0.45s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .todo-enter {
+        animation: none;
+    }
 }
 
 .todo-item:last-child {

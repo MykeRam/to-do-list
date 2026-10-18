@@ -54,10 +54,13 @@ class TodoApp {
                 invalidFields[0].reportValidity();
                 return;
             }
-            this.addTodo(input.value, dateInput.value);
+            const task = input.value;
+            const dueDate = dateInput.value;
             isSubmitting = true;
             try {
                 await this.animateInputReset(fields);
+                await new Promise(resolve => setTimeout(resolve, 180));
+                this.addTodo(task, dueDate);
             } finally {
                 isSubmitting = false;
                 input.focus();
@@ -161,12 +164,12 @@ class TodoApp {
         this.todos.push(newTodo);
         this.saveTodos();
 
-        this.render();
+        this.render(newTodo.id);
     }
 
-    createTodoElement(todo, showDate = false) {
+    createTodoElement(todo, showDate = false, animateId = null) {
         const todoItem = document.createElement('li');
-        todoItem.className = 'todo-item';
+        todoItem.className = todo.id === animateId ? 'todo-item todo-enter' : 'todo-item';
         todoItem.dataset.id = todo.id;
         const dateHtml = showDate && todo.date
             ? `<span class="todo-date overdue">${this.formatDate(todo.date)}</span>`
@@ -219,7 +222,7 @@ class TodoApp {
         });
     }
 
-    renderGrid() {
+    renderGrid(animateId = null) {
         const groupedTodos = {};
         const todayDate = this.getTodayDate();
         this.todos.forEach(todo => {
@@ -245,7 +248,7 @@ class TodoApp {
             });
             const tasks = document.createElement('ul');
             tasks.className = 'tasks';
-            groupedTodos[dateKey].forEach(todo => tasks.appendChild(this.createTodoElement(todo)));
+            groupedTodos[dateKey].forEach(todo => tasks.appendChild(this.createTodoElement(todo, false, animateId)));
             dateElement.appendChild(label);
             dateElement.appendChild(tasks);
             gridContent.appendChild(dateElement);
@@ -345,18 +348,18 @@ class TodoApp {
         localStorage.setItem('todos', JSON.stringify(this.todos));
     }
 
-    render() {
+    render(animateId = null) {
         this.cancelEdit();
         const todayDate = this.getTodayDate();
         const todoList = document.getElementById('todo-list');
         const todayTodos = this.todos.filter(todo => !todo.date || todo.date === todayDate);
         todoList.innerHTML = '';
-        todayTodos.forEach(todo => todoList.appendChild(this.createTodoElement(todo)));
+        todayTodos.forEach(todo => todoList.appendChild(this.createTodoElement(todo, false, animateId)));
         if (todayTodos.length === 0) {
             todoList.innerHTML = '<li class="empty-message">No tasks for today. Add one above!</li>';
         }
 
-        this.renderGrid();
+        this.renderGrid(animateId);
 
         // Keep unfinished past tasks accessible without mixing them into Today.
         const overdueSection = document.getElementById('overdue-section');
@@ -364,7 +367,7 @@ class TodoApp {
         const overdueTodos = this.todos.filter(todo => todo.date && todo.date < todayDate);
         overdueSection.hidden = overdueTodos.length === 0;
         overdueList.innerHTML = '';
-        overdueTodos.forEach(todo => overdueList.appendChild(this.createTodoElement(todo, true)));
+        overdueTodos.forEach(todo => overdueList.appendChild(this.createTodoElement(todo, true, animateId)));
     }
 
     escapeHtml(text) {
