@@ -51,6 +51,17 @@ class TodoApp {
         const addButton = document.getElementById('add-btn');
         const todoList = document.querySelector('.container');
         const fields = [input, dateInput];
+        const legend = document.getElementById('legend-dialog');
+        const legendButton = document.getElementById('legend-btn');
+        legendButton.addEventListener('click', () => legend.showModal());
+        document.getElementById('legend-close-btn').addEventListener('click', () => legend.close());
+        legend.addEventListener('close', () => legendButton.focus());
+        legend.addEventListener('click', (event) => {
+            if (event.target !== legend) return;
+            const bounds = legend.getBoundingClientRect();
+            if (event.clientX < bounds.left || event.clientX > bounds.right
+                || event.clientY < bounds.top || event.clientY > bounds.bottom) legend.close();
+        });
         document.getElementById('notes-close-btn').addEventListener('click', () => this.setNotesOpen(false));
         document.getElementById('task-notes').addEventListener('input', () => this.saveTaskNotes());
 

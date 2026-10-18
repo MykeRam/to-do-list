@@ -17,6 +17,7 @@
                 <input type="date" id="date-input" aria-label="Due date (required)" required>
             </div>
             <div class="input-actions">
+                <button type="button" id="legend-btn" aria-haspopup="dialog" aria-controls="legend-dialog">Legend</button>
                 <a id="history-link" href="#history-section" aria-controls="history-section" aria-expanded="false">History</a>
                 <button id="add-btn">Add</button>
             </div>
@@ -62,6 +63,42 @@
             <p id="notes-save-status" role="status">Notes save automatically.</p>
         </section>
     </div>
+    <dialog id="legend-dialog" aria-labelledby="legend-heading">
+        <div class="history-header">
+            <h2 id="legend-heading">Legend</h2>
+            <button type="button" id="legend-close-btn" aria-label="Close Legend">&times;</button>
+        </div>
+        <dl class="legend-list">
+            <div class="legend-entry">
+                <dt><span class="legend-symbol legend-check" aria-hidden="true">✓</span>Completion bubble</dt>
+                <dd>Click the empty bubble to mark a task complete. Click again to uncheck it.</dd>
+            </div>
+            <div class="legend-entry">
+                <dt><span class="legend-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 3H5v18h14V8l-5-5ZM14 3v5h5M8 12h8M8 16h6"></path></svg></span>Notes</dt>
+                <dd>Open the task’s note editor on the left. Notes save automatically as you type.</dd>
+            </div>
+            <div class="legend-entry">
+                <dt><span class="legend-symbol legend-green" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 3H5v18h14V8l-5-5ZM14 3v5h5M8 12h8M8 16h6"></path></svg></span>Green note icon</dt>
+                <dd>This task has saved notes. Click the icon to read or edit them.</dd>
+            </div>
+            <div class="legend-entry">
+                <dt><span class="legend-symbol legend-orange" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 4l4 4-4 4M19 8H9a5 5 0 0 0 0 10h3"></path></svg></span>Roll over</dt>
+                <dd>Bring an unfinished past task into Today. The original entry stays in History.</dd>
+            </div>
+            <div class="legend-entry">
+                <dt>History</dt>
+                <dd>Open the panel on the right to see past tasks and roll over unfinished ones. Today’s tasks stay in Today until the day ends.</dd>
+            </div>
+            <div class="legend-entry">
+                <dt class="legend-orange">Orange task text</dt>
+                <dd>This task was rolled over from a previous day.</dd>
+            </div>
+            <div class="legend-entry">
+                <dt>Delete</dt>
+                <dd>Remove the task and its notes.</dd>
+            </div>
+        </dl>
+    </dialog>
     <script src="script.js"></script>
 </body>
 </html>

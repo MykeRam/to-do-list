@@ -52,14 +52,26 @@ h1 {
     height: 42px;
 }
 
-#history-link {
+#history-link,
+#legend-btn {
     color: #2e7d32;
     font-size: 14px;
     text-align: right;
     text-underline-offset: 3px;
 }
 
-#history-link:hover {
+#legend-btn {
+    align-self: flex-end;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font-family: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+#history-link:hover,
+#legend-btn:hover {
     color: #1b5e20;
 }
 
@@ -197,7 +209,8 @@ h2 {
 }
 
 #history-close-btn,
-#notes-close-btn {
+#notes-close-btn,
+#legend-close-btn {
     padding: 0 4px;
     border: 0;
     background: transparent;
@@ -208,8 +221,79 @@ h2 {
 }
 
 #history-close-btn:hover,
-#notes-close-btn:hover {
+#notes-close-btn:hover,
+#legend-close-btn:hover {
     color: #222;
+}
+
+#legend-dialog {
+    width: min(520px, calc(100vw - 40px));
+    max-height: calc(100vh - 40px);
+    max-height: calc(100dvh - 40px);
+    margin: auto;
+    padding: 24px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    color: #333;
+}
+
+#legend-dialog::backdrop {
+    background-color: rgba(0,0,0,0.35);
+}
+
+.legend-entry {
+    margin-top: 20px;
+}
+
+.legend-entry dt {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+}
+
+.legend-entry dd {
+    margin-top: 6px;
+    color: #666;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.legend-symbol {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    color: #666;
+}
+
+.legend-symbol svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.legend-green,
+.legend-check {
+    color: #2e7d32;
+    background-color: #e8f5e8;
+}
+
+.legend-check {
+    border-radius: 50%;
+}
+
+.legend-orange {
+    color: #c65d00;
 }
 
 #notes-task-title {
